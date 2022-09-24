@@ -77,7 +77,7 @@ export async function getServerSideProps(context: any) {
 async function getAccessToken(code: string) {
     const client_id = process.env.CLIENT_ID;
     const client_secret = process.env.CLIENT_SECRET;
-    const redirect_uri = "http://localhost:3000/user";
+    const redirect_uri = process.env.REDIRECT_URI;
     const url = `https://accounts.spotify.com/api/token`;
     const data = {
         grant_type: "authorization_code",
