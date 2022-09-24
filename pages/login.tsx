@@ -1,3 +1,4 @@
+
 export default function Login({ variables }:any) {
     return (
         <div>
@@ -9,7 +10,7 @@ export default function Login({ variables }:any) {
 
 export async function getServerSideProps() {
     const client_id = process.env.CLIENT_ID;
-    const redirect_uri = "http://localhost:3000/user";
+    const redirect_uri = process.env.REDIRECT_URI;
     return {
         redirect: {
             destination: `https://accounts.spotify.com/authorize?response_type=code&client_id=${client_id}&scope=user-read-private%20user-read-email&redirect_uri=${redirect_uri}&state=5018`,
