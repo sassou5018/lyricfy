@@ -1,6 +1,7 @@
 import { getAccessToken, getUserInfo, getCurrentTrack } from "../../utils/spotifyApi";
 import { decode } from 'js-base64';
-export default async function refresh (req:any, res:any){
+import { NextApiRequest, NextApiResponse } from "next";
+export default async function refresh (req:NextApiRequest, res:NextApiResponse){
     const token = {
         access_token: req.body.refresh
     }
