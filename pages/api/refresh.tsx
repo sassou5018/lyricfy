@@ -1,4 +1,5 @@
 import { getAccessToken, getUserInfo, getCurrentTrack } from "../../utils/spotifyApi";
+import GetLyrics from "../../utils/geniusApi";
 import { decode } from 'js-base64';
 import { NextApiRequest, NextApiResponse } from "next";
 export default async function refresh (req:NextApiRequest, res:NextApiResponse){
@@ -14,6 +15,7 @@ export default async function refresh (req:NextApiRequest, res:NextApiResponse){
         if (currentTrack.error) {
             return res.status(200).json({userInfo: userInfo, currentTrack: "None"});
         }
+        const lyrics = await GetLyrics(currentTrack.item.artists[0].name, currentTrack.item.name);
         return res.status(200).json({userInfo: userInfo, currentTrack: currentTrack});
     }
 }

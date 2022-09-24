@@ -1,5 +1,5 @@
 async function SearchSong(title:string, artist:string){
-    const url= `https://genius-song-lyrics1.p.rapidapi.com/search?q=${title}%20${artist}&per_page=3&page=1`
+    const url= `https://genius-song-lyrics1.p.rapidapi.com/search?q=${title.replace(/\s+/g, '')}%20${artist.replace(/\s+/g, '')}&per_page=3&page=1`
     const options = {
         method: 'GET',
         headers: {

@@ -1,5 +1,5 @@
 import { encode, decode } from 'js-base64'
-import { Box, Image, Heading, Text, Icon, Button, Progress} from '@chakra-ui/react';
+import { Box, Image, Heading, Text, Icon, Button, Progress, VStack} from '@chakra-ui/react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Profile from '../components/Profile';
@@ -9,11 +9,13 @@ import { getAccessToken, getUserInfo, getCurrentTrack } from '../utils/spotifyAp
 import getLyrics from '../utils/geniusApi';
 export default function User({ userInfo, error, currentTrack, refresh, lyrics }: any) {
     const router = useRouter();
-    const [userInfoState, setUserInfoState] = useState(userInfo);
-    const [currentTrackState, setCurrentTrackState] = useState(currentTrack);
+    const [userInfoState, setUserInfoState] = useState(userInfo||null);
+    const [currentTrackState, setCurrentTrackState] = useState(currentTrack||null);
+    const [lyricsState, setLyricsState] = useState(lyrics||null);
     
     
     console.log('lyrics', lyrics);
+    console.log('currentTrack', currentTrack);
 
 
     async function handleRefresh() {
@@ -39,7 +41,7 @@ export default function User({ userInfo, error, currentTrack, refresh, lyrics }:
     }
     if (error) {
 
-        setTimeout(() => { router.push('/') }, 2000);
+        setTimeout(() => { router.push('/') }, 500);
         return (<>
             <div>{error}. Redirecting...</div>
         </>)
@@ -48,14 +50,26 @@ export default function User({ userInfo, error, currentTrack, refresh, lyrics }:
         //console.log('userInfo', userInfo);
         return (
             <>
-            <Box height="100vh" width="100vw" display="flex" flexDirection="column" justifyContent="center" alignItems="center" bgColor="gray.500" >
+            <Box height="100vh" width="100vw" display="flex" flexDirection="row" justifyContent="space-between" alignItems="center" bgColor="gray.500" overflow="hidden">
+                <VStack marginLeft="50">
                 <Profile userInfo={userInfoState} />
-                {currentTrack&&!currentTrack.error ? <Track currentTrack={currentTrackState}/> : null}
+                {currentTrack.item ? <Track currentTrack={currentTrackState}/> : null}
                 <Button onClick={handleRefresh}>refresh</Button>
+                </VStack>
+                {lyrics? <VStack maxW="600px" maxH="98vh" overflow="auto" marginRight="64">
+                    <Heading textColor="white">Lyrics</Heading>
+                    
+                    <Text textColor="white" fontSize="2xs" cursor="pointer"><Link href={lyrics.metadata.url} passHref target='_blank'><a target="_blank">Open In Genius</a></Link></Text>
+                    
+                    <Text textColor="white">{lyricsState.lyrics.lyrics.body.plain}</Text>
+                </VStack> : null}
             </Box>
             </>
         )
     }
+    return (
+        <h1>Error... Please retry</h1>
+    )
 
 }
 
@@ -90,6 +104,7 @@ export async function getServerSideProps(context: any) {
             }
         }
         const lyrics = await getLyrics(currentTrack.item.artists[0].name, currentTrack.item.name);
+        console.log('ssr lyrics', lyrics)
         if (lyrics.error){
             return {
                 props: {
