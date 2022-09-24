@@ -65,7 +65,7 @@ const Home: NextPage = () => {
           <Text fontSize='xs' textAlign='center'>PS: So uhh Spotify&aposs API only allows 25 predetermined users to use Apps and don&apost allow hobby/education projects to have unlimited acess </Text>
           <Text fontSize='xs' textAlign='center'>So if you want to test the app, drop ur email here and I&apoll add you to the list or hmu on <Link href="mailto:yassinebenahmede@gmail.com" passHref><a>yassinebenahmede@gmail.com</a></Link></Text>
           <form onSubmit={handleSubmit}>
-          <Input type='email' placeholder="your@email.i'llGiveYouAcess" isRequired name="email" bgColor='green' w="250px"></Input>
+          <Input type='email' placeholder="your@email.i'llGiveYouAcess" isRequired name="email" bgColor='gray.600' w="250px" shadow="base" _placeholder={{color: 'white'}}></Input>
           {/* Kinda too lazy to setup and SMTP mailer so yes i'm literally saving yalls emails in a database since it's easier and free anyway */}
           </form>
           </VStack>
