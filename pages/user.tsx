@@ -18,7 +18,7 @@ export default function User({ userInfo, error, currentTrack }: any) {
     if (userInfo) {
         console.log('userInfo', userInfo);
         return (
-            <Box height="100vh" width="100vw" display="flex" flexDirection="column" justifyContent="center" alignItems="center" >
+            <Box height="100vh" width="100vw" display="flex" flexDirection="column" justifyContent="center" alignItems="center" bgColor="gray.500" >
                 <Profile userInfo={userInfo} />
                 {currentTrack&&!currentTrack.error ? <Track currentTrack={currentTrack} /> : null}
             </Box>

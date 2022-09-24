@@ -4,7 +4,7 @@ export default function Track({ currentTrack }: any){
     if(currentTrack){
         return (
             <>
-            <VStack border="4px" borderColor="green" borderRadius="20px" padding="10px" margin="10px">
+            <VStack border="2px" borderColor="green" borderRadius="20px" padding="20px" margin="10px" bgColor="gray.800" color="white">
                 <Image alt="album artwork" src={currentTrack.item.album.images[1].url}/>
                 <Heading>{currentTrack.item.name}</Heading>
                 <Text>By: {currentTrack.item.artists[0].name}</Text>
