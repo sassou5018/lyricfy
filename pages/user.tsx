@@ -36,6 +36,7 @@ export default function User({ userInfo, error, currentTrack, refresh, lyrics }:
             console.log('update', json);
             setUserInfoState(json.userInfo);
             setCurrentTrackState(json.currentTrack);
+            setLyricsState(json.lyrics);
         }
 
     }
