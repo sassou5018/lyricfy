@@ -16,6 +16,6 @@ export default async function refresh (req:NextApiRequest, res:NextApiResponse){
             return res.status(200).json({userInfo: userInfo, currentTrack: "None"});
         }
         const lyrics = await GetLyrics(currentTrack.item.artists[0].name, currentTrack.item.name);
-        return res.status(200).json({userInfo: userInfo, currentTrack: currentTrack});
+        return res.status(200).json({userInfo: userInfo, currentTrack: currentTrack, lyrics: lyrics});
     }
 }
