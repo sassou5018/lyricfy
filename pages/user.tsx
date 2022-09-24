@@ -1,29 +1,75 @@
-import { encode, decode } from 'js-base64';
-import { Box, Image, Heading, Text, Icon } from '@chakra-ui/react';
+import { encode, decode } from 'js-base64'
+import { Box, Image, Heading, Text, Icon, Button, Progress, VStack} from '@chakra-ui/react';
 import Link from 'next/link';
-import { RiSpotifyLine } from 'react-icons/ri';
 import { useRouter } from 'next/router';
 import Profile from '../components/Profile';
 import Track from '../components/Track';
-export default function User({ userInfo, error, currentTrack }: any) {
+import { useState, useEffect } from 'react';
+import { getAccessToken, getUserInfo, getCurrentTrack } from '../utils/spotifyApi';
+import getLyrics from '../utils/geniusApi';
+export default function User({ userInfo, error, currentTrack, refresh, lyrics }: any) {
     const router = useRouter();
+    const [userInfoState, setUserInfoState] = useState(userInfo||null);
+    const [currentTrackState, setCurrentTrackState] = useState(currentTrack||null);
+    const [lyricsState, setLyricsState] = useState(lyrics||null);
+    
+    
+    console.log('lyrics', lyrics);
     console.log('currentTrack', currentTrack);
+
+
+    async function handleRefresh() {
+        const endpoint = '/api/refresh';
+        const data = {
+            refresh: refresh
+        }
+        const options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body:JSON.stringify(data)
+        }
+        const result = await fetch(endpoint, options);
+        const json = await result.json();
+        if(json){
+            console.log('update', json);
+            setUserInfoState(json.userInfo);
+            setCurrentTrackState(json.currentTrack);
+        }
+
+    }
     if (error) {
 
-        setTimeout(() => { router.push('/') }, 2000);
+        setTimeout(() => { router.push('/') }, 500);
         return (<>
             <div>{error}. Redirecting...</div>
         </>)
     }
     if (userInfo) {
-        console.log('userInfo', userInfo);
+        //console.log('userInfo', userInfo);
         return (
-            <Box height="100vh" width="100vw" display="flex" flexDirection="column" justifyContent="center" alignItems="center" >
-                <Profile userInfo={userInfo} />
-                {currentTrack&&!currentTrack.error ? <Track currentTrack={currentTrack} /> : null}
+            <>
+            <Box height="100vh" width="100vw" display="flex" flexDirection="row" justifyContent="space-between" alignItems="center" bgColor="gray.500" overflow="hidden">
+                <VStack marginLeft="50">
+                <Profile userInfo={userInfoState} />
+                {currentTrack.item ? <Track currentTrack={currentTrackState}/> : null}
+                <Button onClick={handleRefresh}>refresh</Button>
+                </VStack>
+                {lyrics? <VStack maxW="600px" maxH="98vh" overflow="auto" marginRight="64">
+                    <Heading textColor="white">Lyrics</Heading>
+                    
+                    <Text textColor="white" fontSize="2xs" cursor="pointer"><Link href={lyrics.metadata.url} passHref target='_blank'><a target="_blank">Open In Genius</a></Link></Text>
+                    
+                    <Text textColor="white">{lyricsState.lyrics.lyrics.body.plain}</Text>
+                </VStack> : null}
             </Box>
+            </>
         )
     }
+    return (
+        <h1>Error... Please retry</h1>
+    )
 
 }
 
@@ -52,14 +98,28 @@ export async function getServerSideProps(context: any) {
             return {
                 props: {
                     userInfo: JSON.parse(JSON.stringify(userInfo)),
-                    currentTrack: "None"
+                    currentTrack: "None",
+                    refresh: JSON.parse(JSON.stringify(encode(token.access_token)))
                 }
             }
+        }
+        const lyrics = await getLyrics(currentTrack.item.artists[0].name, currentTrack.item.name);
+        console.log('ssr lyrics', lyrics)
+        if (lyrics.error){
+            return {
+                props: {
+                    userInfo: JSON.parse(JSON.stringify(userInfo)),
+                    currentTrack: JSON.parse(JSON.stringify(currentTrack)),
+                    refresh: JSON.parse(JSON.stringify(encode(token.access_token)))
+            }
+        }
         }
         return {
             props: {
                 userInfo: JSON.parse(JSON.stringify(userInfo)),
-                currentTrack: JSON.parse(JSON.stringify(currentTrack))
+                currentTrack: JSON.parse(JSON.stringify(currentTrack)),
+                refresh: token.access_token,
+                lyrics: JSON.parse(JSON.stringify(lyrics))
             }
         }
     }
@@ -74,63 +134,3 @@ export async function getServerSideProps(context: any) {
     }
 }
 
-async function getAccessToken(code: string) {
-    const client_id = process.env.CLIENT_ID;
-    const client_secret = process.env.CLIENT_SECRET;
-    const redirect_uri = process.env.REDIRECT_URI;
-    const url = `https://accounts.spotify.com/api/token`;
-    const data = {
-        grant_type: "authorization_code",
-        code: code,
-        redirect_uri: redirect_uri,
-    }
-    //@ts-ignore
-    const params = new URLSearchParams(data);
-    const headers = {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${encode(`${client_id}:${client_secret}`)}`
-    }
-    const result = await fetch(url, {
-        method: 'POST',
-        headers: headers,
-        body: params
-    });
-    const json = await result.json();
-    return json;
-}
-
-async function getUserInfo(token: string) {
-    const url = `https://api.spotify.com/v1/me`;
-    const headers = {
-        'content-type': 'application/json',
-        'Authorization': `Bearer ${token}`
-    }
-    const result = await fetch(url, {
-        method: 'GET',
-        headers: headers
-    });
-    const json = await result.json();
-    return json;
-}
-
-async function getCurrentTrack(token: string, userInfo: any) {
-    const url = `https://api.spotify.com/v1/me/player/currently-playing`;
-    const headers = {
-        'content-type': 'application/json',
-        'Authorization': `Bearer ${token}`
-    }
-    const body = {
-        market: userInfo.country
-    }
-    const result = await fetch(url, {
-        method: 'GET',
-        headers: headers
-    });
-    console.log('result', result);
-    if (result.status == 204) {
-        return { error: 'error' }
-    }
-    const json = await result.json();
-    console.log('json', json);
-    return json;
-}
