@@ -84,6 +84,7 @@ async function getAccessToken(code: string) {
         code: code,
         redirect_uri: redirect_uri,
     }
+    //@ts-ignore
     const params = new URLSearchParams(data);
     const headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
