@@ -3,36 +3,28 @@ import { Box, Image, Heading, Text, Icon } from '@chakra-ui/react';
 import Link from 'next/link';
 import { RiSpotifyLine } from 'react-icons/ri';
 import { useRouter } from 'next/router';
-export default function User({ userInfo, error }: any) {
+import Profile from '../components/Profile';
+import Track from '../components/Track';
+export default function User({ userInfo, error, currentTrack }: any) {
     const router = useRouter();
+    console.log('currentTrack', currentTrack);
     if (error) {
-        
-        setTimeout(() => {router.push('/')}, 2000);
+
+        setTimeout(() => { router.push('/') }, 2000);
         return (<>
-        <div>{error}. Redirecting...</div>
+            <div>{error}. Redirecting...</div>
         </>)
     }
     if (userInfo) {
         console.log('userInfo', userInfo);
         return (
-            <>
-            <Box height="100vh" width="100vw" display="flex" justifyContent="center" alignItems="center" >
-                <Box border="2px" borderRadius='20px' padding="15px" borderColor="green">
-                    <Box display="flex" alignItems="center">
-                        <Image src={userInfo.images.length!=0 ? userInfo.images[0].url : "https://secure.gravatar.com/avatar/2a1d845bb47a98dd4759592fedb5bb33?s=96&r=g&d=https://similarpng.com/wp-content/plugins/userswp/assets/images/no_profile.png"} alt="User Profile Picture" height="200px" width="200px" borderRadius="full" maxW="120px" maxH="120px" />
-                        <Text color='green' marginLeft="10px">Spotify User<Icon as={RiSpotifyLine} marginLeft="5px"/></Text>
-                    </Box>
-                    <Link href={userInfo.external_urls.spotify|| null} passHref>
-                    <Heading cursor="pointer">{userInfo.display_name || null}</Heading>
-                    </Link>
-                    <Text>{userInfo.email || null}</Text>
-                    <Text>{userInfo.country || null}</Text>
-                    <Text>{userInfo.product || null}</Text>
-                </Box>
+            <Box height="100vh" width="100vw" display="flex" flexDirection="column" justifyContent="center" alignItems="center" >
+                <Profile userInfo={userInfo} />
+                {currentTrack&&!currentTrack.error ? <Track currentTrack={currentTrack} /> : null}
             </Box>
-            </>
         )
     }
+
 }
 
 export async function getServerSideProps(context: any) {
@@ -55,14 +47,24 @@ export async function getServerSideProps(context: any) {
                 }
             }
         }
+        const currentTrack = await getCurrentTrack(token.access_token, userInfo);
+        if (currentTrack.error) {
+            return {
+                props: {
+                    userInfo: JSON.parse(JSON.stringify(userInfo)),
+                    currentTrack: "None"
+                }
+            }
+        }
         return {
             props: {
-                userInfo: JSON.parse(JSON.stringify(userInfo))
+                userInfo: JSON.parse(JSON.stringify(userInfo)),
+                currentTrack: JSON.parse(JSON.stringify(currentTrack))
             }
         }
     }
 
-    console.log('token', token);
+    //console.log('token', token);
 
     //console.log('req', req);
     return {
@@ -108,5 +110,27 @@ async function getUserInfo(token: string) {
         headers: headers
     });
     const json = await result.json();
+    return json;
+}
+
+async function getCurrentTrack(token: string, userInfo: any) {
+    const url = `https://api.spotify.com/v1/me/player/currently-playing`;
+    const headers = {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${token}`
+    }
+    const body = {
+        market: userInfo.country
+    }
+    const result = await fetch(url, {
+        method: 'GET',
+        headers: headers
+    });
+    console.log('result', result);
+    if (result.status == 204) {
+        return { error: 'error' }
+    }
+    const json = await result.json();
+    console.log('json', json);
     return json;
 }
