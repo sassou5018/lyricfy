@@ -1,47 +1,45 @@
-async function SearchSong(title:string, artist:string){
-    const url= `https://genius-song-lyrics1.p.rapidapi.com/search?q=${title.replace(/\s+/g, '')}%20${artist.replace(/\s+/g, '')}&per_page=3&page=1`
+async function SearchSong(title: string, artist: string) {
+    const url = `https://genius-song-lyrics1.p.rapidapi.com/search?q=${title.replace(
+        /\s+/g,
+        '%20'
+    )}%20${artist.replace(/\s+/g, '%20')}&per_page=3&page=1`
     const options = {
         method: 'GET',
         headers: {
-            'x-rapidapi-key':  process.env.RAPID_API_KEY,
-            'X-RapidAPI-Host': 'genius-song-lyrics1.p.rapidapi.com'
-        }
+            'x-rapidapi-key': process.env.RAPID_API_KEY,
+            'X-RapidAPI-Host': 'genius-song-lyrics1.p.rapidapi.com',
+        },
     }
     //@ts-ignore
-    const result = await fetch(url, options);
-    const data = await result.json();
-    if(data.meta.status == 200){
-    return data;
-    }
-    else{
-        return {error: "No song found"}
+    const result = await fetch(url, options)
+    const data = await result.json()
+    if (data.meta.status == 200) {
+        return data
+    } else {
+        return { error: 'No song found' }
     }
 }
 
-
-export default async function GetLyrics(title:string, artist:string){
-    const id = await SearchSong(title, artist);
-    if(id.error){
-        return id;
+export default async function GetLyrics(title: string, artist: string) {
+    const id = await SearchSong(title, artist)
+    if (id.error) {
+        return id
     }
     const url = `https://genius-song-lyrics1.p.rapidapi.com/songs/${id.response.hits[0].result.id}/lyrics`
     const options = {
         method: 'GET',
         headers: {
-            'x-rapidapi-key':  process.env.RAPID_API_KEY,
-            'X-RapidAPI-Host': 'genius-song-lyrics1.p.rapidapi.com'
-        }
+            'x-rapidapi-key': process.env.RAPID_API_KEY,
+            'X-RapidAPI-Host': 'genius-song-lyrics1.p.rapidapi.com',
+        },
     }
     //@ts-ignore
-    const result = await fetch(url, options);
-    const data = await result.json();
-    if(data.meta.status == 200){
+    const result = await fetch(url, options)
+    const data = await result.json()
+    if (data.meta.status == 200) {
         return {
             lyrics: data.response.lyrics,
-            metadata: id.response.hits[0].result
+            metadata: id.response.hits[0].result,
         }
-    } else return {error: "No lyrics found"}
+    } else return { error: 'No lyrics found' }
 }
-
-
-
