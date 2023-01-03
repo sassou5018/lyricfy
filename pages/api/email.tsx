@@ -1,30 +1,46 @@
-import connectDb from "../../utils/connectDb";
-import emailModel from "../../utils/emailDocument";
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiRequest, NextApiResponse } from 'next'
+import nodeMailer from 'nodemailer'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== 'POST') {
-        res.status(405).json({ error: 'Method not allowed' });
-        return;
-    }
-    const email = req.body.email;
-    if (!email) {
-        res.status(400).json({ error: 'Bad request' });
-        return;
+type EmailData = {
+    from: string
+    to: string
+    subject: string
+    text: string
+}
+
+const sendEmail = async (emailData: EmailData) => {
+    const transporter = nodeMailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        requireTLS: true,
+        auth: {
+            user: process.env.user,
+            pass: process.env.password,
+        },
+    })
+    return (
+        transporter
+            //@ts-ignore
+            .sendMail(emailData)
+    )
+}
+
+export default async function handler(
+    req: NextApiRequest,
+    res: NextApiResponse
+) {
+    const { email } = req.body
+    const emailData = {
+        from: email,
+        to: 'yassinebenahmede@gmail.com',
+        subject: `Lyricfy Request from ${email}`,
+        text: `A user with the email ${email} has requested to be added to the Lyricfy whitelist`,
     }
     try {
-        await connectDb();
-        const result = await emailModel.create({ email: email });
-        res.status(200).json({ success: 'Email added to the list' });
-    } catch(error){
-        //@ts-ignore
-        console.log('error', error.code)
-        //@ts-ignore
-        if (error.code === 11000) {
-            res.status(400).json({ error: 'Email already exists' });
-        }
-        //@ts-ignore
-        res.status(500).json({ error: error.message });
+        await sendEmail(emailData)
+        res.status(200).json({ success: 'Email Added To The List' })
+    } catch (e) {
+        res.status(400).json({ error: 'An error occured' })
     }
-    
 }
