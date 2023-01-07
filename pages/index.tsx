@@ -55,7 +55,7 @@ const Home: NextPage = () => {
     return (
         <>
             <Head>
-                <title>Lircfy By Yassine Ben Ahmed</title>
+                <title>Lyricfy By Yassine Ben Ahmed</title>
             </Head>
 
             <nav>
@@ -123,7 +123,6 @@ const Home: NextPage = () => {
                                 shadow='base'
                                 _placeholder={{ color: 'white' }}
                             ></Input>
-                            {/* Kinda too lazy to setup and SMTP mailer so yes i'm literally saving yalls emails in a database since it's easier and free anyway */}
                         </form>
                     </VStack>
                 </main>
