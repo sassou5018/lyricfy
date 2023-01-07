@@ -4,7 +4,7 @@ _Due to the way Spotify's API functions i need to pre-allow access from their da
 
 ~~Also genius's API isn't much better since they don't parse spaces " " in their request params so any song title or artist name with more 3 space separated words is broken and returns an error.~~ **_-This was fixed -_**
 
-App server and ~~database~~(_database no longer needed_) server both hosted on ~~railway~~ Netlify u can check it all out from [here](lyricfy.benahmed.tech).
+App server and ~~database~~(_database no longer needed_) server both hosted on ~~railway~~ Netlify u can check it all out from [here](https://lyricfy.benahmed.tech).
 
 ---
 
